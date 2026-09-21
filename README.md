@@ -1,37 +1,39 @@
 # RHID Attendance Exporter
 
-Projeto de investigação autorizada para descobrir as chamadas usadas pelo RHID e automatizar, com segurança, a coleta de ponto e banco de horas dos funcionários.
+An authorized investigation and automation project for safely exporting employee attendance and hour-bank data from RHID.
 
-## Cuidados
+## Security and privacy
 
-- Não coloque usuário, senha, cookies, tokens ou PDFs reais no Git.
-- Use somente acesso autorizado da empresa.
-- Não compartilhe arquivos de `exports/`, `downloads/`, `logs/` ou `.auth/` sem revisar dados pessoais.
-- Não adicione arquivos compactados: eles podem contornar a revisão visual e carregar relatórios ou dados pessoais.
-- Se uma credencial foi exposta em chat, issue, commit ou print, troque a senha antes de seguir.
+- Never commit usernames, passwords, cookies, tokens, or real PDFs.
+- Use this project only with authorized company access.
+- Do not share files from `exports/`, `downloads/`, `logs/`, or `.auth/` without first reviewing them for personal data.
+- Do not add compressed archives. They can bypass visual review and may contain reports or personal data.
+- If a credential has been exposed in a chat, issue, commit, or screenshot, rotate it before continuing.
 
-## Stack sugerida
+See [SECURITY.md](SECURITY.md) for the repository's complete security and privacy guidance.
 
-- Node.js + TypeScript
-- Playwright com Chromium
-- `.env` para credenciais
+## Technology
 
-Essa stack facilita investigar SPAs com rotas `#/...`, capturar chamadas de rede e automatizar downloads quando a rotina exata for conhecida.
+- Node.js and TypeScript
+- Playwright with Chromium
+- `.env` files for local credentials
 
-## Instalação
+This stack makes it practical to investigate single-page applications with `#/...` routes, capture network requests, and automate downloads after the required workflow has been identified.
+
+## Installation
 
 ```bash
 npm install
 npm run install:browsers
 ```
 
-Crie o arquivo `.env` a partir de `.env.example`:
+Create a local `.env` file from `.env.example`:
 
 ```bash
 cp .env.example .env
 ```
 
-Preencha:
+Then provide your RHID credentials:
 
 ```env
 RHID_EMAIL=
@@ -40,93 +42,93 @@ HEADLESS=false
 RHID_BASE_URL=https://www.rhid.com.br
 ```
 
-## Comandos
+## Commands
 
-Investigar chamadas da aplicação enquanto navega:
+Inspect application requests while navigating RHID:
 
 ```bash
 npm run investigate
 ```
 
-Extrair uma primeira amostra de funcionários visíveis e respostas de rede relacionadas:
+Extract an initial sample of visible employees and related network responses:
 
 ```bash
 npm run employees
 ```
 
-Listar endpoints XHR/Fetch vistos nas telas principais, sem gravar dados reais:
+List the XHR and Fetch endpoints observed on the main screens without saving complete responses:
 
 ```bash
 npm run endpoints
 ```
 
-Acessar a tela de ponto diário por intervalo:
+Open the daily attendance screen for a date range:
 
 ```bash
-npm run ponto -- --employee-id ID_DO_FUNCIONARIO --start 2026-01-01 --end 2026-01-31
+npm run ponto -- --employee-id EMPLOYEE_ID --start 2026-01-01 --end 2026-01-31
 ```
 
-Exportar snapshot de banco de horas em uma data:
+Export an hour-bank snapshot for a specific date:
 
 ```bash
 npm run hour-bank -- --date 2026-05-20
 ```
 
-Gerar e baixar PDF de extrato de banco de horas para um funcionário:
+Generate and download an employee's hour-bank statement as a PDF:
 
 ```bash
-npm run report-hour-bank -- --employee-id ID_DO_FUNCIONARIO --start 2026-01-01 --end 2026-01-31
+npm run report-hour-bank -- --employee-id EMPLOYEE_ID --start 2026-01-01 --end 2026-01-31
 ```
 
-Esse comando usa o relatório nativo `extrato_banco_horas` do RHID. Ele foi mantido para investigação, mas não é a fonte principal, porque pode sair zerado mesmo quando a tela de apuração mostra faltas e extras.
+This command uses RHID's native `extrato_banco_horas` report. It remains available for investigation, but it is not the primary data source because RHID may generate an empty report even when the attendance review screen shows absences and overtime.
 
-Exportar a tabela rica da tela `#/manutencao_ponto` para CSV:
+Export the detailed table from `#/manutencao_ponto` as CSV:
 
 ```bash
-npm run maintenance-csv -- --employee-id ID_DO_FUNCIONARIO --start 2026-01-01 --end 2026-03-31
+npm run maintenance-csv -- --employee-id EMPLOYEE_ID --start 2026-01-01 --end 2026-03-31
 ```
 
-Exportar todos os funcionários desde a admissão, criando CSVs e PDFs próprios a partir da tela `#/manutencao_ponto`:
+Export every employee from their admission date onward, creating local CSV and PDF files from the `#/manutencao_ponto` data:
 
 ```bash
 npm run export-all -- --csv-days 93 --pdf-days 366
 ```
 
-Opções úteis:
+Useful options:
 
 ```bash
-npm run export-all -- --employee-id ID_DO_FUNCIONARIO --csv-days 93 --pdf-days 366
+npm run export-all -- --employee-id EMPLOYEE_ID --csv-days 93 --pdf-days 366
 npm run export-all -- --skip-pdf
 npm run export-all -- --skip-csv
 npm run export-all -- --until 2026-05-20
 ```
 
-Os scripts atuais são investigativos. Eles evitam gravar respostas completas por padrão para reduzir risco de vazamento de dados pessoais. Depois de identificar os endpoints corretos, a próxima etapa é transformar a captura em clientes de API com paginação, filtros por funcionário e downloads mensais.
+The current scripts are investigative. By default, they avoid saving complete network responses to reduce the risk of leaking personal data. Once the correct endpoints are confirmed, the captured behavior can be implemented as API clients with pagination, employee filters, and monthly downloads.
 
-## Descobertas atuais
+## Current findings
 
 - Login: `POST /v2/login.svc/`
-- Lista de funcionários ativos: `GET /v2/customerdb/person.svc/a_status/ativo?...`
-- Lista ativa simples: `GET /v2/customerdb/person.svc/a_ativo`
-- Banco de horas por data: `GET /v2/customerdb/person.svc/person_banco_horas?date=YYYYMMDD`
-- Dados ricos da tela Manutenção de Ponto: `POST /v2/report.svc/apuracao_ponto_salva_tabela`
-- Geração de relatório: `POST /v2/report.svc/ponto`
-- Status do processamento: `GET /v2/customerdb/notify.svc/specificGuid/?guid=<GUID>`
-- Download do arquivo: `POST /v2/customerdb/notify.svc/save_file/?format=PDF&guid=<GUID>`
+- Active employee list: `GET /v2/customerdb/person.svc/a_status/ativo?...`
+- Simplified active employee list: `GET /v2/customerdb/person.svc/a_ativo`
+- Hour bank by date: `GET /v2/customerdb/person.svc/person_banco_horas?date=YYYYMMDD`
+- Detailed attendance-review data: `POST /v2/report.svc/apuracao_ponto_salva_tabela`
+- Report generation: `POST /v2/report.svc/ponto`
+- Report-processing status: `GET /v2/customerdb/notify.svc/specificGuid/?guid=<GUID>`
+- File download: `POST /v2/customerdb/notify.svc/save_file/?format=PDF&guid=<GUID>`
 
-O endpoint de banco de horas aceitou datas antigas nos testes, então a trava de 3 meses parece existir na interface de apuração, não nesse endpoint específico. O endpoint de manutenção retorna dados diários bem mais completos, mas falha em períodos longos; por isso `export-all` usa blocos de 93 dias por padrão. Os PDFs finais são gerados localmente a partir desses mesmos dados da manutenção, com saldo do dia calculado como `extra diurna + extra noturna - falta/atraso`.
+During testing, the hour-bank endpoint accepted dates older than three months. This suggests the three-month restriction may exist in the attendance-review interface rather than in that endpoint. The attendance-review endpoint returns much richer daily data but fails for long date ranges, so `export-all` uses 93-day chunks by default. Final PDFs are generated locally from that data, with each day's balance calculated as `daytime overtime + nighttime overtime - absence/late time`.
 
-## Fluxo recomendado
+## Recommended investigation workflow
 
-1. Rode `npm run investigate` com `HEADLESS=false`.
-2. Faça login e navegue até `#/list/person`.
-3. Observe no terminal as chamadas que parecem carregar funcionários.
-4. Vá até `#/ponto_diario`, filtre um funcionário e intervalo pequeno.
-5. Anote endpoints, métodos, payloads e parâmetros em `docs/investigation.md`.
-6. Use `npm run hour-bank` para snapshots de saldo e `npm run report-hour-bank` para gerar PDFs.
+1. Run `npm run investigate` with `HEADLESS=false`.
+2. Sign in and navigate to `#/list/person`.
+3. Review the terminal output for requests that appear to load employees.
+4. Open `#/ponto_diario`, then filter one employee over a short date range.
+5. Record endpoint methods, payloads, and parameters in `docs/investigation.md` without copying sensitive values.
+6. Use `npm run hour-bank` for balance snapshots and `npm run report-hour-bank` for native RHID PDFs.
 
-## Limitações conhecidas
+## Known limitations
 
-- A interface pode limitar consultas aos últimos 3 meses. Se o backend também bloquear períodos antigos, será necessário pedir ao fornecedor RHID exportação oficial ou liberação de endpoint/relatório histórico.
-- Seletores da tela podem mudar. Por isso o projeto prioriza capturar chamadas de rede e só usa automação visual como apoio.
-- Relatórios muito longos devem ser particionados por funcionário e por mês para reduzir risco de bloqueio, timeout ou fila excessiva.
+- The interface may restrict queries to the previous three months. If the backend enforces the same restriction, request an official historical export or endpoint access from RHID.
+- Screen selectors may change. The project therefore prioritizes capturing network requests and uses visual automation only as supporting behavior.
+- Long reports should be divided by employee and date range to reduce the risk of request rejection, timeouts, or report-queue congestion.
