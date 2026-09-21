@@ -1,0 +1,28 @@
+{
+  "name": "rhid-attendance-exporter",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Exportacao autorizada e segura de dados de ponto e banco de horas do RHID.",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "check": "tsc --noEmit -p tsconfig.json",
+    "install:browsers": "playwright install chromium",
+    "investigate": "tsx src/index.ts investigate",
+    "endpoints": "tsx src/index.ts endpoints",
+    "employees": "tsx src/index.ts employees",
+    "hour-bank": "tsx src/index.ts hour-bank",
+    "report-hour-bank": "tsx src/index.ts report-hour-bank",
+    "maintenance-csv": "tsx src/index.ts maintenance-csv",
+    "export-all": "tsx src/index.ts export-all",
+    "ponto": "tsx src/index.ts ponto"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "playwright": "^1.49.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

@@ -1,0 +1,37 @@
+.env
+.env.*
+!.env.example
+
+node_modules/
+dist/
+coverage/
+
+.auth/
+playwright-report/
+test-results/
+
+exports/*
+!exports/.gitkeep
+downloads/*
+!downloads/.gitkeep
+logs/*
+!logs/.gitkeep
+*.log
+*.har
+
+# Arquivos que podem conter dados pessoais ou sessão
+cookies*.json
+storage-state*.json
+employees*.json
+funcionarios*.json
+*.pdf
+*.csv
+*.xlsx
+
+# Arquivos compactados podem esconder relatórios, exports ou dados pessoais
+*.zip
+*.7z
+*.rar
+*.tar
+*.tar.gz
+*.tgz
